@@ -17,3 +17,7 @@ For users: They can see the historical performance of the vault before investing
 - [ ] Add more features to the model to increase the accuracy from 64% to 75%
 - [ ] Instead of gating rebalance on the wallet address, verify the proof on chain before executing
 - [ ] Integrate with Nostra, zkLend or ZKX on mainnet to leverage and deleverage positions
+
+## Deployment
+
+Vault: [0x00af269b779a997a3fc7fe98f119f1e56f8f5546a7e1974a89698c360c2665fe](https://sepolia.starkscan.co/contract/0x00af269b779a997a3fc7fe98f119f1e56f8f5546a7e1974a89698c360c2665fe)
