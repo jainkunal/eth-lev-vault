@@ -36,7 +36,6 @@ CORRELATION_PERIODS = [7, 14, 21, 28]
 def get_data(start="2020-01-01", end="2024-06-01"):
     # Fetch ETH data
     eth_data = yf.download("ETH-USD", start=start, end=end)
-    print(eth_data.shape)
 
     # Calculate EMA
     eth_data["EMA_12"] = eth_data["Close"].ewm(span=12, adjust=False).mean()
@@ -107,12 +106,10 @@ def get_data(start="2020-01-01", end="2024-06-01"):
 
     index_data = get_index_data(start, end)
 
-    print(eth_data.shape)
-    print(index_data.shape)
     merge_index_data(eth_data, index_data)
 
-    print(eth_data.shape)
-    eth_data.dropna(inplace=True)
+    # print(eth_data.shape)
+    # eth_data.dropna(inplace=True)
 
     return eth_data
 
@@ -124,7 +121,6 @@ def merge_index_data(eth_data, index_data):
         eth_index_data, index_data, left_index=True, right_index=True, how="inner"
     )
 
-    print(merged_data)
     merged_data.dropna(inplace=True)
 
     # Calculate rolling correlations for each index
@@ -136,11 +132,26 @@ def merge_index_data(eth_data, index_data):
                 .corr(merged_data[f"{name}_Close"])
             )
 
+    cols = []
     for name in INDICES.keys():
         for period in CORRELATION_PERIODS:
+            cols.append(f"Corr_{name}_{period}")
             eth_data[f"Corr_{name}_{period}"] = merged_data[f"Corr_{name}_{period}"]
 
-    eth_data.dropna(inplace=True)
+    # Copy data from Friday to Saturday and Sunday
+    fridays = eth_data[eth_data.index.weekday == 4]
+
+    # Iterate over each Friday
+    for friday in fridays.index:
+        # Determine the corresponding Saturday and Sunday
+        saturday = friday + pd.Timedelta(days=1)
+        sunday = friday + pd.Timedelta(days=2)
+
+        # Check if Saturday and Sunday are within the DataFrame's index range
+        if saturday in eth_data.index and sunday in eth_data.index:
+            # Copy the data from Friday to Saturday and Sunday
+            eth_data.loc[saturday, cols] = eth_data.loc[friday, cols]
+            eth_data.loc[sunday, cols] = eth_data.loc[friday, cols]
 
 
 def get_index_data(start, end):
