@@ -495,4 +495,3 @@ abi = [
     },
 ]
 abi = AbiParser(abi).parse()
-print(abi.interfaces)
